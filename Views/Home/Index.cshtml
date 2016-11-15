@@ -1,0 +1,93 @@
+﻿@model DesafioDigitalPages.ViewModel.CharacterViewModel
+@{
+    ViewBag.Title = "Personagens";
+}
+
+<script src="~/scripts/jquery-3.1.1.js"></script>
+<script src="~/scripts/desafio.js"></script>
+<h2>Personagens</h2>
+<table id="myTable" class="table table-bordered table-condensed table-condensed">
+    <tr style="background-color: #428ac9; color: #ffffff">
+        <th class="col-md-2">Nome</th>
+        <th class="col-md-8">Descrição</th>
+        <th class="col-md-2">Última atualização</th>
+    </tr>
+    @foreach (var item in Model.Items.Data.Results)
+    {
+        <tr class="clickable-row" id="@item.Id">
+            <td class="col-md-2">
+                @item.Name
+            </td>
+            <td class="col-md-8">
+                @item.Description
+            </td>
+            <td class="col-md-2">
+                @Convert.ToDateTime(item.Modified).ToString("dd/MM/yyyy")
+            </td>
+        </tr>
+    }
+</table>
+
+@if (Model.Pager.EndPage > 1)
+{
+    <ul class="pagination">
+        @if (Model.Pager.CurrentPage > 1)
+        {
+            <li>
+                <a href="@Url.Action("Index")">Primeiro</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index")?page=@(Model.Pager.CurrentPage - 1)">Anterior</a>
+            </li>
+        }
+
+        @for (var page = Model.Pager.StartPage; page <= Model.Pager.EndPage; page++)
+        {
+            <li class="@(page == Model.Pager.CurrentPage ? "active" : "")">
+                <a href="@Url.Action("Index")?page=@page">@page</a>
+            </li>
+        }
+
+        @if (Model.Pager.CurrentPage < Model.Pager.TotalPages)
+        {
+            <li>
+                <a href="@Url.Action("Index")?page=@(Model.Pager.CurrentPage + 1)">Próximo</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index")?page=@(Model.Pager.TotalPages)">Ultimo</a>
+            </li>
+        }
+    </ul>
+}
+
+<div class="modal fade" id="myModal">
+
+</div>
+
+<style>
+    .clickable-row {
+        cursor: pointer;
+    }
+</style>
+<script language="javascript">
+    $(document).ready(function () {
+        $('#myTable').on('click', '.clickable-row', function (event) {
+            $(this).addClass('active').siblings().removeClass('active');
+            var id = $(this).closest('tr').attr("Id");
+            $("#myModal").load('@Url.Action("Detalhe")?id=' + id, function () {
+                $("#myModal").modal();
+            });
+        });
+
+        jQuery(document).ajaxStart(function () {
+             ajaxindicatorstart('Por favor, aguarde !!!!');
+        }).ajaxStop(function () {
+             ajaxindicatorstop();
+        });
+
+        jQuery.ajax({
+            global: false
+        });
+
+    });
+</script>
